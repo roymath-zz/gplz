@@ -1,19 +1,21 @@
 import pytest
 from gplz.demo import shorten
-
+import random; random.seed('x')
 
 def test_basic():
+    shorten.clear()
 
     # basic functionality
     url = b"some/very/long/url?with-arg1=xx&arg2=yy"
-    assert shorten.shorten(url) == ('new', 'EkCCu4MWoB')
+    assert shorten.shorten(url)[0] == 'new'
+
     # test caching
-    assert shorten.shorten(url) == ('cached', 'EkCCu4MWoB')
+    assert shorten.shorten(url)[0] == 'cached'
 
     # basic functionality with a second url; test caching
     url2 = b"some/other/url?with-arg1=abb&arg2=yy"
-    assert shorten.shorten(url2) == ('new', 'tGsoaoYuAO')
-    assert shorten.shorten(url2) == ('cached', 'tGsoaoYuAO')
+    assert shorten.shorten(url2)[0] == 'new'
+    assert shorten.shorten(url2)[0] == 'cached'
 
     # create a custom short code
     url3 = b"/my/custom/url/one?arg1=x1&arg2=x2"
@@ -23,15 +25,19 @@ def test_basic():
     with pytest.raises(Exception, match='already exists'):
         assert shorten.custom(url3, 'custom1')
 
+    # don't allow invalid custom short codes
+    with pytest.raises(Exception, match='invalid characters in shortcode'):
+        assert shorten.custom(url3, '?custom1')
+
     # allow multiple shortcodes to reference the same url
     assert shorten.custom(url3, 'custom2') == ('new', 'custom2')
 
     # test lookup of short codes
-    assert shorten.lookup('tGsoaoYuAO')['url'] == url2
+    assert shorten.lookup('custom1')['url'] == url3
 
     # test attributes of short codes
-    assert shorten.lookup('tGsoaoYuAO')['access_count'] == 2
-    assert shorten.lookup('tGsoaoYuAO')['created']
+    assert shorten.lookup('custom1')['access_count'] == 2
+    assert shorten.lookup('custom1')['created']
 
     # negative test
     with pytest.raises(Exception, match='no sha'):

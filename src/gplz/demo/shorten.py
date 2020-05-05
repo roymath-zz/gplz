@@ -21,13 +21,14 @@ _cache = {}
 _shortcodes = {}
 
 
+# helper: generate new shortcode
 def new_shortcode():
     while True:
         shortcode = ''.join([random.choice(CHOICES) for e in range(URLLEN)])
         if shortcode not in _shortcodes:
             return shortcode
 
-
+# helper: create new sha
 def new_sha(url):
     m = hashlib.sha256()
     m.update(url)
@@ -35,6 +36,15 @@ def new_sha(url):
     return sha
 
 
+# add entry in caches
+def add(url, shortcode, sha):
+    ts = datetime.datetime.now().timestamp()
+    _cache[sha] = {'shortcode': shortcode, 'url': url, 'created': ts}
+    _shortcodes[shortcode] = sha
+    return 'new', shortcode
+
+
+# shorten url
 def shorten(url, custom=None):
     sha = new_sha(url)
     if sha in _cache:
@@ -42,30 +52,23 @@ def shorten(url, custom=None):
 
     # need new short-code; generate and add to cache
     shortcode = new_shortcode()
-    ts = datetime.datetime.now().timestamp()
-    _cache[sha] = {'shortcode': shortcode, 'url': url, 'created': ts}
-    _shortcodes[shortcode] = sha
-
-    return 'new', shortcode
+    return add(url, shortcode, sha)
 
 
+# shorten url w/custom shortcode
 def custom(url, shortcode):
     if shortcode in _shortcodes:
         raise Exception(f'shortcode {shortcode} already exists!')
+    if len(set(shortcode) - set(CHOICES)):
+        raise Exception(f'invalid characters in shortcode {shortcode}!')
 
     # prefix the url with the custom shortcode to allow multiple refs
     sha = new_sha(f'{shortcode}: {url}'.encode('utf8'))
-    if sha in _cache:
-        return 'cached', _cache[sha]['shortcode']
 
-    # need new short-code; generate and add to cache
-    ts = datetime.datetime.now().timestamp()
-    _cache[sha] = {'shortcode': shortcode, 'url': url, 'created': ts}
-    _shortcodes[shortcode] = sha
-
-    return 'new', shortcode
+    return add(url, shortcode, sha)
 
 
+# lookup url by shortcode
 def lookup(shortcode):
     try:
         sha = _shortcodes[shortcode]
