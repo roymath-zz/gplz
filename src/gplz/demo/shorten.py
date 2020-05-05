@@ -1,8 +1,5 @@
 import hashlib
-import urllib.parse
 import datetime
-import base64
-from pprint import pprint
 import string
 import random
 random.seed('x')
@@ -27,6 +24,7 @@ def new_shortcode():
         shortcode = ''.join([random.choice(CHOICES) for e in range(URLLEN)])
         if shortcode not in _shortcodes:
             return shortcode
+
 
 # helper: create new sha
 def new_sha(url):
@@ -76,7 +74,7 @@ def lookup(shortcode):
         res.setdefault('access_count', 0)
         res['access_count'] += 1
         return res
-    except:
+    except Exception:
         raise Exception(f'no sha found in {"/".join(list(_shortcodes))}')
 
 
@@ -85,4 +83,3 @@ def clear():
     global _cache
     global _shortcodes
     _cache, _shortcodes = {}, {}
-

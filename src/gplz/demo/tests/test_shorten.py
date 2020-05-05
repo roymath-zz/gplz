@@ -1,6 +1,6 @@
 import pytest
 from gplz.demo import shorten
-import random; random.seed('x')
+
 
 def test_basic():
     shorten.clear()

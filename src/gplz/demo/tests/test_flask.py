@@ -1,7 +1,4 @@
-import unittest
 import pytest
-import json
-
 from gplz.demo import my_flask
 
 demo = my_flask.demo.test_client()
@@ -17,13 +14,6 @@ class TestFlaskOps:
         )
         return response
 
-    def test_get(self):
-        response = demo.get('/')
-        data = response.data.decode("utf-8")
-        assert data == "ho yo"
-        etag = json.loads(response.headers['etag'])
-        assert etag == "9031b4bb342abf3270d8ffc9e1ead3de"
-
     def test_shorten(self):
         response = self.makeRequest()
         assert response.headers['Content-Type'] == 'application/json'
@@ -33,8 +23,9 @@ class TestFlaskOps:
     def test_custom(self):
         response = demo.post(
             '/ops/custom',
-            json={'url': 'https://google.com?q=flowers&s=lilacs',
-                  'shortcode': 'custom1',
+            json={
+                'url': 'https://google.com?q=flowers&s=lilacs',
+                'shortcode': 'custom1',
             },
             follow_redirects=True,
             headers={"Content-Type": "application/json"},
@@ -68,4 +59,3 @@ class TestFlaskOps:
         assert response.headers['Content-Type'] == 'application/json'
         data = response.get_json()
         assert data == 'https://google.com?q=flowers&s=lilacs'
-
