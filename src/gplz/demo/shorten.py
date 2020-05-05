@@ -28,16 +28,37 @@ def new_shortcode():
             return shortcode
 
 
-def shorten(url):
+def new_sha(url):
     m = hashlib.sha256()
     m.update(url)
     sha = m.digest()
+    return sha
 
+
+def shorten(url, custom=None):
+    sha = new_sha(url)
     if sha in _cache:
         return 'cached', _cache[sha]['shortcode']
 
     # need new short-code; generate and add to cache
     shortcode = new_shortcode()
+    ts = datetime.datetime.now().timestamp()
+    _cache[sha] = {'shortcode': shortcode, 'url': url, 'created': ts}
+    _shortcodes[shortcode] = sha
+
+    return 'new', shortcode
+
+
+def custom(url, shortcode):
+    if shortcode in _shortcodes:
+        raise Exception(f'shortcode {shortcode} already exists!')
+
+    # prefix the url with the custom shortcode to allow multiple refs
+    sha = new_sha(f'{shortcode}: {url}'.encode('utf8'))
+    if sha in _cache:
+        return 'cached', _cache[sha]['shortcode']
+
+    # need new short-code; generate and add to cache
     ts = datetime.datetime.now().timestamp()
     _cache[sha] = {'shortcode': shortcode, 'url': url, 'created': ts}
     _shortcodes[shortcode] = sha

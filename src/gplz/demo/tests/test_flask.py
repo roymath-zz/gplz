@@ -1,4 +1,5 @@
 import unittest
+import pytest
 import json
 
 from gplz.demo import my_flask
@@ -29,6 +30,19 @@ class TestFlaskOps:
         data = response.get_json()
         assert data == ['new', 'EkCCu4MWoB']
 
+    def test_custom(self):
+        response = demo.post(
+            '/ops/custom',
+            json={'url': 'https://google.com?q=flowers&s=lilacs',
+                  'shortcode': 'custom1',
+            },
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        )
+        assert response.headers['Content-Type'] == 'application/json'
+        data = response.get_json()
+        assert data == ['new', 'custom1']
+
     def test_lookup(self, clearCache):
         response = self.makeRequest()  # prime the cache
 
@@ -42,6 +56,7 @@ class TestFlaskOps:
         data = response.get_json()
         assert data == 'https://google.com?q=flowers&s=lilacs'
 
+    @pytest.mark.skip(reason="flask testing: issue w/external redirects")
     def test_redirect(self, clearCache):
         response = self.makeRequest()  # prime the cache
 
@@ -53,5 +68,4 @@ class TestFlaskOps:
         assert response.headers['Content-Type'] == 'application/json'
         data = response.get_json()
         assert data == 'https://google.com?q=flowers&s=lilacs'
-
 

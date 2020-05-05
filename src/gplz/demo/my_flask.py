@@ -38,6 +38,15 @@ def handle_shorten():
     return Response(json.dumps(res), mimetype='application/json')
 
 
+@demo.route('/ops/custom', methods=['POST'])
+def handle_custom():
+    data = request.get_json()
+    url = data.get('url', 'NO URL')
+    shortcode = data.get('shortcode', 'NO SHORTCODE')
+    res = shorten.custom(url.encode('utf8'), shortcode)
+    return Response(json.dumps(res), mimetype='application/json')
+
+
 @demo.route('/ops/lookup', methods=['POST'])
 def handle_lookup():
     data = request.get_json()
@@ -55,5 +64,4 @@ def handle_redirect(path):
 
 if __name__ == "__main__":
     demo.run()
-
 
