@@ -1,11 +1,3 @@
-import hashlib
-import datetime
-import string
-import random
-random.seed('x')
-
-URLLEN = 10  # max chars in shortened url
-CHOICES = string.printable[:62]  # select only digits and letters
 """
 maintain a lookup table of:
   _cache = {sha: {url, shortcode, created, access_count}}
@@ -13,6 +5,17 @@ maintain a lookup table of:
 and a set of shortcodes for reverse lookup
   _shortcodes = {shortcode: sha}
 """
+
+from urllib.parse import urlparse
+import hashlib
+import datetime
+import string
+import random
+
+random.seed('x')  # predictable test values
+
+URLLEN = 10  # max chars in shortened url
+CHOICES = string.printable[:62]  # select only digits and letters
 
 _cache = {}
 _shortcodes = {}
@@ -34,8 +37,16 @@ def new_sha(url):
     return sha
 
 
+def check_url(url):
+    res = urlparse(url)
+    if not res.scheme or not res.netloc:
+        raise Exception(f'invalid url {url}')
+
+
 # add entry in caches
 def add(url, shortcode, sha):
+    check_url(url)  # validate
+
     ts = datetime.datetime.now().timestamp()
     _cache[sha] = {'shortcode': shortcode, 'url': url, 'created': ts}
     _shortcodes[shortcode] = sha

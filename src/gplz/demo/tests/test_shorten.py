@@ -6,20 +6,24 @@ def test_basic():
     shorten.clear()
 
     # basic functionality
-    url = b"some/very/long/url?with-arg1=xx&arg2=yy"
+    url = b"http://some/very/long/url?with-arg1=xx&arg2=yy"
     assert shorten.shorten(url)[0] == 'new'
 
     # test caching
     assert shorten.shorten(url)[0] == 'cached'
 
     # basic functionality with a second url; test caching
-    url2 = b"some/other/url?with-arg1=abb&arg2=yy"
+    url2 = b"http://some/other/url?with-arg1=abb&arg2=yy"
     assert shorten.shorten(url2)[0] == 'new'
     assert shorten.shorten(url2)[0] == 'cached'
 
     # create a custom short code
-    url3 = b"/my/custom/url/one?arg1=x1&arg2=x2"
+    url3 = b"http://my/custom/url/one?arg1=x1&arg2=x2"
     assert shorten.custom(url3, 'custom1') == ('new', 'custom1')
+
+    # create a custom short code
+    with pytest.raises(Exception, match='invalid url'):
+        assert shorten.custom('junk-url3', 'custom100')
 
     # don't reuse custom short codes
     with pytest.raises(Exception, match='already exists'):
