@@ -47,6 +47,14 @@ class TestFlaskOps:
         data = response.get_json()
         assert data == 'https://google.com?q=flowers&s=lilacs'
 
+    def test_dump(self, clearCache):
+        response = self.makeRequest()  # prime the cache
+
+        response = demo.get('/ops/dump')
+        assert response.headers['Content-Type'] == 'application/json'
+        data = response.get_json()
+        assert data[0]['url'] == 'https://google.com?q=flowers&s=lilacs'
+
     @pytest.mark.skip(reason="flask testing: issue w/external redirects")
     def test_redirect(self, clearCache):
         response = self.makeRequest()  # prime the cache

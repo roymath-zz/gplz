@@ -32,7 +32,7 @@ def new_shortcode():
 # helper: create new sha
 def new_sha(url):
     m = hashlib.sha256()
-    m.update(url)
+    m.update(url.encode('utf8'))
     sha = m.digest()
     return sha
 
@@ -48,7 +48,11 @@ def add(url, shortcode, sha):
     check_url(url)  # validate
 
     ts = datetime.datetime.now().timestamp()
-    _cache[sha] = {'shortcode': shortcode, 'url': url, 'created': ts}
+    _cache[sha] = {
+        'shortcode': shortcode,
+        'url': url,
+        'created': ts
+    }
     _shortcodes[shortcode] = sha
     return 'new', shortcode
 
@@ -72,7 +76,7 @@ def custom(url, shortcode):
         raise Exception(f'invalid characters in shortcode {shortcode}!')
 
     # prefix the url with the custom shortcode to allow multiple refs
-    sha = new_sha(f'{shortcode}: {url}'.encode('utf8'))
+    sha = new_sha(f'{shortcode}: {url}')
 
     return add(url, shortcode, sha)
 
@@ -87,6 +91,11 @@ def lookup(shortcode):
         return res
     except Exception:
         raise Exception(f'no sha found in {"/".join(list(_shortcodes))}')
+
+
+# dump all cached data
+def dump():
+    return _cache.values()
 
 
 # clear global cache (for testing)

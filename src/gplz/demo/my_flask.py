@@ -18,7 +18,7 @@ logging.getLogger('flask_cors').level = logging.DEBUG
 def handle_shorten():
     data = request.get_json()
     url = data.get('url', 'NO URL')
-    res = shorten.shorten(url.encode('utf8'))
+    res = shorten.shorten(url)
     return Response(json.dumps(res), mimetype='application/json')
 
 
@@ -27,7 +27,7 @@ def handle_custom():
     data = request.get_json()
     url = data.get('url', 'NO URL')
     shortcode = data.get('shortcode', 'NO SHORTCODE')
-    res = shorten.custom(url.encode('utf8'), shortcode)
+    res = shorten.custom(url, shortcode)
     return Response(json.dumps(res), mimetype='application/json')
 
 
@@ -36,14 +36,20 @@ def handle_lookup():
     data = request.get_json()
     url = data.get('shortcode', 'NO URL')
     res = shorten.lookup(url)
-    return Response(json.dumps(res['url'].decode('utf8')),
+    return Response(json.dumps(res['url']),
                     mimetype='application/json')
+
+
+@demo.route('/ops/dump', methods=['GET'])
+def handle_dump():
+    res = [dict(e) for e in shorten.dump()]
+    return Response(json.dumps(res), mimetype='application/json')
 
 
 @demo.route('/<path>', methods=['GET'])
 def handle_redirect(path):
     res = shorten.lookup(path)
-    url = res['url'].decode('utf8')
+    url = res['url']
     return redirect(url)
 
 
